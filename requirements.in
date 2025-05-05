@@ -1,2 +1,4 @@
 sseclient-py
 pydantic
+pydantic_settings
+requests

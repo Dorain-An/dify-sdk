@@ -1,5 +1,4 @@
 import json
-import logging
 import re
 from typing import BinaryIO, Optional, Type, TypeVar
 
@@ -9,8 +8,8 @@ from sseclient import SSEClient
 
 from .config import settings
 from .constants.base import HttpMethod
+from .utils import info
 
-logger = logging.getLogger(__name__)
 REQUEST_TIME_OUT = 300
 ModelType = TypeVar("ModelType", bound="BaseModel")  # pylint: disable=invalid-name
 
@@ -89,12 +88,9 @@ class DifySDK:
         request_path = path
         for key in self.path_comp.findall(path):
             if path_params is None or key[1:] not in path_params:
-                raise DifyApiError(message=f"路径参数{key}未设置")
+                raise DifyApiError(message=f"missing path parameters: {key}")
             request_path = path.replace(key, str(path_params[key[1:]]))
         return request_path
-
-    def _parse_error(self, resp: dict) -> None:
-        pass
 
     def request(  # pylint: disable=too-many-arguments
         self,
@@ -111,9 +107,7 @@ class DifySDK:
         request_path = self._get_request_path(path, path_params)
         url = f"{self.api_url}/{request_path}"
         data = self._complete_data(data or {}, user, stream)
-        logger.info(
-            f"[request]{self.app_name} {http_method.value}, path: {request_path}, params: {data}, stream: {stream}"
-        )
+        info(f"[request]{self.app_name} {http_method.value}, path: {request_path}, params: {data}, stream: {stream}")
         if http_method == "POST":
             if stream:
                 response = requests.post(
@@ -127,19 +121,52 @@ class DifySDK:
             parsed_resp = self._parse_stream_data(response)
         else:
             parsed_resp = self._parse_resp_data(response)
-        logger.info(
+        info(
             f"[response]{self.app_name} {http_method.value}, path: {request_path}, "
             f"params: {data}, stream: {stream}, response: {parsed_resp}"
         )
-        self._parse_error(parsed_resp)
         if model:
             return model.model_validate(parsed_resp)
         return parsed_resp
 
     def system_request(
         self,
-    ):
-        pass
+        path: str,
+        *,
+        data: Optional[dict] = None,
+        path_params: Optional[dict] = None,
+        http_method: HttpMethod = HttpMethod.GET,
+    ) -> dict:
+        request_path = self._get_request_path(path, path_params)
+        url = f"{self.api_url}/{request_path}"
+        info(f"[request] {self.app_name} {http_method.value}, path: {request_path}, params: {data}")
+        if http_method == HttpMethod.POST:
+            response = requests.post(url, json=data, headers=self.headers, timeout=REQUEST_TIME_OUT)
+        elif http_method == HttpMethod.DELETE:
+            response = requests.delete(url, json=data, headers=self.headers, timeout=REQUEST_TIME_OUT)
+        elif http_method == HttpMethod.PUT:
+            response = requests.put(url, json=data, headers=self.headers, timeout=REQUEST_TIME_OUT)
+        else:
+            response = requests.get(url, params=data, headers=self.headers, timeout=REQUEST_TIME_OUT)
+        parsed_resp = self._parse_resp_data(response)
+        info(
+            f"[response] {self.app_name} {http_method.value}, path: {request_path}, "
+            f"params: {data}, response: {parsed_resp}"
+        )
+        return parsed_resp
 
     def upload_file(self, user: str, file: dict[str, BinaryIO | tuple]) -> dict:
+        """上传文件"""
         return self.request("files/upload", files=file, user=user)
+
+    def get_app_info(self) -> dict:
+        """获取应用信息"""
+        return self.system_request("info", http_method=HttpMethod.GET)
+
+    def get_app_parameters(self) -> dict:
+        """获取应用参数"""
+        return self.system_request("parameters", http_method=HttpMethod.GET)
+
+    def get_app_tools(self) -> dict:
+        """获取工具icon"""
+        return self.system_request("meta", http_method=HttpMethod.GET)

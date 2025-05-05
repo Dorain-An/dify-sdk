@@ -6,7 +6,7 @@
 #
 annotated-types==0.7.0
     # via
-    #   -r /home/jlf/proj/dify-sdk/requirements.txt
+    #   -r /home/dorain/proj/dorain/dify-sdk/requirements.txt
     #   pydantic
 astroid==3.3.9
     # via pylint
@@ -20,8 +20,16 @@ black==25.1.0
     # via -r requirements-dev.in
 build==1.2.2.post1
     # via pip-tools
+certifi==2025.4.26
+    # via
+    #   -r /home/dorain/proj/dorain/dify-sdk/requirements.txt
+    #   requests
 cffi==1.17.1
     # via cryptography
+charset-normalizer==3.4.2
+    # via
+    #   -r /home/dorain/proj/dorain/dify-sdk/requirements.txt
+    #   requests
 click==8.1.8
     # via
     #   black
@@ -41,6 +49,10 @@ flake8-bugbear==24.12.12
     # via -r requirements-dev.in
 flake8-pyproject==1.2.3
     # via -r requirements-dev.in
+idna==3.10
+    # via
+    #   -r /home/dorain/proj/dorain/dify-sdk/requirements.txt
+    #   requests
 isort==6.0.1
     # via
     #   -r requirements-dev.in
@@ -80,11 +92,15 @@ pycodestyle==2.13.0
 pycparser==2.22
     # via cffi
 pydantic==2.11.3
-    # via -r /home/jlf/proj/dify-sdk/requirements.txt
+    # via
+    #   -r /home/dorain/proj/dorain/dify-sdk/requirements.txt
+    #   pydantic-settings
 pydantic-core==2.33.1
     # via
-    #   -r /home/jlf/proj/dify-sdk/requirements.txt
+    #   -r /home/dorain/proj/dorain/dify-sdk/requirements.txt
     #   pydantic
+pydantic-settings==2.9.1
+    # via -r /home/dorain/proj/dorain/dify-sdk/requirements.txt
 pyflakes==3.3.2
     # via
     #   autoflake
@@ -97,12 +113,18 @@ pyproject-hooks==1.2.0
     # via
     #   build
     #   pip-tools
+python-dotenv==1.1.0
+    # via
+    #   -r /home/dorain/proj/dorain/dify-sdk/requirements.txt
+    #   pydantic-settings
 pyyaml==6.0.2
     # via bandit
+requests==2.32.3
+    # via -r /home/dorain/proj/dorain/dify-sdk/requirements.txt
 rich==14.0.0
     # via bandit
 sseclient-py==1.8.0
-    # via -r /home/jlf/proj/dify-sdk/requirements.txt
+    # via -r /home/dorain/proj/dorain/dify-sdk/requirements.txt
 stevedore==5.4.1
     # via bandit
 tomlkit==0.13.2
@@ -119,17 +141,21 @@ types-setuptools==78.1.0.20250329
     # via types-cffi
 typing-extensions==4.13.2
     # via
-    #   -r /home/jlf/proj/dify-sdk/requirements.txt
+    #   -r /home/dorain/proj/dorain/dify-sdk/requirements.txt
     #   mypy
     #   pydantic
     #   pydantic-core
     #   typing-inspection
 typing-inspection==0.4.0
     # via
-    #   -r /home/jlf/proj/dify-sdk/requirements.txt
+    #   -r /home/dorain/proj/dorain/dify-sdk/requirements.txt
     #   pydantic
+    #   pydantic-settings
 urllib3==2.4.0
-    # via types-requests
+    # via
+    #   -r /home/dorain/proj/dorain/dify-sdk/requirements.txt
+    #   requests
+    #   types-requests
 wheel==0.45.1
     # via pip-tools
 
