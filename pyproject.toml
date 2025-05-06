@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "dify_sdk"
+name = "pydify_sdk"
 version = "0.1.0"
 authors = [
   { name="jinlingfeng", email="jinlingfeng2020@163.com" },

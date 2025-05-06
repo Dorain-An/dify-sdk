@@ -3,7 +3,7 @@
 ## Examples
 ### Work Flow
 ```
-from dify_sdk import DifyWorkFlow
+from pydify_sdk import DifyWorkFlow
 
 app = DifyWorkFlow("your_app_key", app_name="xxx")
 user = "me" 
@@ -12,7 +12,7 @@ app.run(user, data)
 ```
 ### Chat Flow
 ```
-from dify_sdk import DifyChatFlow
+from pydify_sdk import DifyChatFlow
 
 app = DifyChatFlow("your_app_key", app_name="xxx")
 user = "me"
