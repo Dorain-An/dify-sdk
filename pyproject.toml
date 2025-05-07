@@ -4,13 +4,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pydify_sdk"
-version = "0.1.0"
+version = "0.1.1"
 authors = [
   { name="jinlingfeng", email="jinlingfeng2020@163.com" },
 ]
 description = "A package for quickly calling dify"
 readme = "README.md"
-license = { file = "LICENSE" }
 requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -22,6 +21,9 @@ dependencies = [
     "pydantic_settings",
     "requests",
 ]
+
+[project.license]
+file = "LICENSE"
 
 [project.urls]
 "Homepage" = "https://github.com/Dorain-An/dify-sdk"

@@ -12,7 +12,7 @@ _SysExcInfoType: TypeAlias = Union[
 _ExcInfoType: TypeAlias = Union[None, bool, _SysExcInfoType, BaseException]
 LOGGING_CONF = {
     "version": 1,
-    'disable_existing_loggers': False,
+    "disable_existing_loggers": False,
     "formatters": {
         "default_fmt": {"format": "[%(asctime)s][%(levelname)s] [%(funcName)s]: %(message)s"},
     },
@@ -39,7 +39,7 @@ def info(
     exc_info: _ExcInfoType = None,
     stack_info: bool = False,
     stacklevel: int = 1,
-    extra: Mapping[str, object] | None = None
+    extra: Mapping[str, object] | None = None,
 ):
     if not settings.DIFY_LOGGER_ON:
         return

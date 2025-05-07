@@ -1,8 +1,11 @@
+import json
 from typing import Any, Optional
 
+import requests
 from pydantic import BaseModel
+from sseclient import SSEClient
 
-from .base import DifySDK, ModelType
+from .base import REQUEST_TIME_OUT, DifySDK, ModelType
 from .constants.base import HttpMethod
 from .schema import (
     ChatFlowResponse,
@@ -21,7 +24,7 @@ class DifyChatFlow(DifySDK):
         return {
             "query": query,
             "conversation_id": conversation_id,
-            "inputs": data.model_dump() if isinstance(data, BaseModel) else data,
+            "inputs": data.model_dump() if isinstance(data, BaseModel) else (data or {}),
             "files": files,
         }
 
@@ -34,6 +37,10 @@ class DifyChatFlow(DifySDK):
         data: Optional[dict | ModelType] = None,
         files: Optional[list[FileInput]] = None,
     ) -> ChatFlowStreamResponse:
+        """
+        对话(流式返回)
+        @return: ChatFlowStreamResponse
+        """
         request_data = self._build_data(query, conversation_id, data, files)
         response = self.request("chat-messages", user, data=request_data, stream=True, model=ChatFlowStreamResponse)
         return response  # type: ignore
@@ -47,9 +54,40 @@ class DifyChatFlow(DifySDK):
         data: Optional[dict | ModelType] = None,
         files: Optional[list[FileInput]] = None,
     ) -> ChatFlowResponse:
+        """
+        对话(同步返回)
+        @return: ChatFlowResponse
+        """
         request_data = self._build_data(query, conversation_id, data, files)
         response = self.request("chat-messages", user, data=request_data, model=ChatFlowResponse)
         return response  # type: ignore
+
+    def async_chat(
+        self,
+        user: str,
+        query: str,
+        *,
+        conversation_id: str = "",
+        data: Optional[dict | ModelType] = None,
+        files: Optional[list[FileInput]] = None,
+    ) -> tuple[str, str, str]:
+        """
+        以http回调的方式对话
+        @return: (conversation_id, task_id, message_id)
+        """
+        url = f"{self.api_url}/chat-messages"
+        data = self._complete_data(self._build_data(query, conversation_id, data, files), user, True)
+        resp = requests.post(url, json=data, headers=self.headers, stream=True, timeout=REQUEST_TIME_OUT)
+        self._handle_error_response(resp)
+        _conversation_id = task_id = message_id = ""
+        client = SSEClient(resp)  # type: ignore
+        for item in client.events():
+            event = json.loads(item.data)
+            _conversation_id = event.get("conversation_id", "")
+            task_id = event.get("task_id", "")
+            message_id = event.get("message_id", "")
+            break
+        return _conversation_id, task_id, message_id
 
     def stop_chat(self, user: str, task_id: str) -> None:
         self.request(
@@ -76,7 +114,10 @@ class DifyChatFlow(DifySDK):
         )
 
     def get_suggested(self, user: str, message_id: str) -> ChatSuggestedResponse:
-        """获取下一个问题建议"""
+        """
+        获取下一个问题建议
+        @return: ChatSuggestedResponse
+        """
         return self.request(
             "messages/:message_id/suggested",
             user,
@@ -88,7 +129,10 @@ class DifyChatFlow(DifySDK):
     def get_chat_history(
         self, user: str, conversation_id: str, first_id: Optional[str] = None, limit: int = 20
     ) -> ChatHistoryResponse:
-        """获取聊天记录"""
+        """
+        获取聊天记录
+        @return: ChatHistoryResponse
+        """
         data: dict[str, Any] = {"conversation_id": conversation_id, "limit": limit}
         if first_id:
             data["first_id"] = first_id
@@ -103,7 +147,10 @@ class DifyChatFlow(DifySDK):
     def get_conversations(
         self, user: str, last_id: Optional[str] = None, limit: int = 20, sort_by: Optional[str] = None
     ) -> ChatListResponse:
-        """获取会话列表"""
+        """
+        获取会话列表
+        @return: ChatListResponse
+        """
         data: dict[str, Any] = {"limit": limit}
         if last_id:
             data["last_id"] = last_id

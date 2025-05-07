@@ -70,7 +70,7 @@ class DifySDK:
         try:
             for item in client.events():
                 event = json.loads(item.data)
-                if event["event"] in {"workflow_finished"}:
+                if event["event"] in {"workflow_finished", "message_end", "error"}:
                     return event
             raise DifyApiError(message=f"run failed: {event}")
         except json.JSONDecodeError as e:
@@ -108,13 +108,17 @@ class DifySDK:
         url = f"{self.api_url}/{request_path}"
         data = self._complete_data(data or {}, user, stream)
         info(f"[request]{self.app_name} {http_method.value}, path: {request_path}, params: {data}, stream: {stream}")
-        if http_method == "POST":
+        if http_method == HttpMethod.POST:
             if stream:
                 response = requests.post(
                     url, json=data, headers=self.headers, files=files, stream=True, timeout=REQUEST_TIME_OUT
                 )
             else:
                 response = requests.post(url, json=data, headers=self.headers, files=files, timeout=REQUEST_TIME_OUT)
+        elif http_method == HttpMethod.DELETE:
+            response = requests.delete(url, json=data, headers=self.headers, timeout=REQUEST_TIME_OUT)
+        elif http_method == HttpMethod.PUT:
+            response = requests.put(url, json=data, headers=self.headers, timeout=REQUEST_TIME_OUT)
         else:
             response = requests.get(url, params=data, headers=self.headers, timeout=REQUEST_TIME_OUT)
         if stream:
